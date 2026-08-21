@@ -19,6 +19,9 @@ int main(int argc, char *argv[])
 
 	char buffer[4096];
 
+	int foundInput = 0;
+	int line_number = 0;
+
 	// 1. Проверка аргументов и их значений
 	for (int i = 1; i < argc; i++)
 	{
@@ -72,17 +75,21 @@ int main(int argc, char *argv[])
 
 	while (fgets(buffer, sizeof(buffer), file) != NULL)
 	{
+		line_number++;
+
 		if (strstr(buffer, str_value) != NULL)
 		{
 			found = 1;
-			break;
+			foundInput++;
+
+			printf("Line %d: %s\n", line_number, buffer);;
 		}
 	}
 
 	fclose(file);
 
 	if (found != 0)
-		printf("The word is %s found in text\n", str_value);
+		printf("The word is %s found in text %d times\n", str_value, foundInput);
 	else {
 		printf("The word is %s didn't find in text\n", str_value);
 		return 1;
