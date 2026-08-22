@@ -4,6 +4,14 @@
 
 #include <windows.h>
 
+void paintAndPrintText(char* text, int color)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, color);
+	printf("%s", text);
+	SetConsoleTextAttribute(hConsole, 7);
+}
+
 // grep, который рабоатет через аргументы -p | --path и -s | --str
 // -p | --path - путь до файла
 // -s | --str - строка для поиска в тексте
@@ -63,12 +71,16 @@ int main(int argc, char *argv[])
 		return 1;	
 	}
 	else {
-		printf("The path - %s\nLook for string - %s\n\n", path_value, str_value);
+		printf("The path - ");
+		paintAndPrintText(path_value, 11); // Голубой
+		printf("\nLook for string - ");
+		paintAndPrintText(str_value, 14); // Желтый
+		printf("\n\n");
 	}
 
 
 	// 3. Открытие и чтение текста из файла
-	puts("Open the file by the path\n");
+	puts("Open the file by the path....\n");
 
 	FILE* file = fopen(path_value, "r");
 	if (file == NULL) { perror("Cannot open the file"); return 1; }
@@ -82,17 +94,26 @@ int main(int argc, char *argv[])
 			found = 1;
 			foundInput++;
 
-			printf("Line %d: %s\n", line_number, buffer);;
+			char line_number_str[16];
+			itoa(line_number, line_number_str, 10);
+
+			printf("Line ");
+			paintAndPrintText(line_number_str, 14); // Желтый
+			printf(": %s", buffer);
 		}
 	}
 
 	fclose(file);
 
-	if (found != 0)
-		printf("The word is %s found in text %d times\n", str_value, foundInput);
+	if (found != 0) {
+		printf("\nThe word is ");
+		paintAndPrintText(str_value, 10); // Зеленый
+		printf(" found in text %d times\n", foundInput);
+	}
 	else {
-		printf("The word is %s didn't find in text\n", str_value);
-		return 1;
+		printf("The word is ");
+		paintAndPrintText(str_value, 12); // Красный
+		printf(" didn't find in text\n");
 	}
 
 	return 0;
