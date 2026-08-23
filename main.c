@@ -4,6 +4,8 @@
 
 #include <windows.h>
 
+#include <shlwapi.h>
+
 void paintAndPrintText(char* text, int color)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -26,6 +28,7 @@ int main(int argc, char *argv[])
 	char* path_value = NULL;
 	char* str_value = NULL;
 	int showAllTextInfo = 1;
+	int ignore_case = 0;
 
 	int found = 0;
 
@@ -68,6 +71,10 @@ int main(int argc, char *argv[])
 				puts("ERROR. Write down a value -sm/--show-more");
 				return 1;
 			}
+		}
+		else if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--ignore-case") == 0)
+		{
+			ignore_case = 1;
 		}
 		else {
 			printf("Unknown argument: %s\n", argv[i]);
@@ -121,16 +128,26 @@ int main(int argc, char *argv[])
 
 		line_number = 0;
 		int file_found = 0;
+		int file_found_count = 0;
 
 		while (fgets(buffer, sizeof(buffer), file) != NULL)
 		{
 			line_number++;
 
-			if (strstr(buffer, str_value) != NULL)
-			{
+			char* found_pos;
+
+			if (ignore_case) {
+				found_pos = StrStrI(buffer, str_value); // Без учета регистра
+			}
+			else {
+				found_pos = strstr(buffer, str_value); // С учетом регистра
+			}
+
+			if (found_pos != NULL) {
 				found = 1;
 				file_found = 1;
 				foundInput++;
+				file_found_count++;
 
 				if (showAllTextInfo) {
 					char line_number_str[16];
@@ -146,18 +163,15 @@ int main(int argc, char *argv[])
 		fclose(file);
 
 		// Выводим результат для текущего файла
-		if (showAllTextInfo) {
-			puts("");
-			if (file_found) {
-				printf("File ");
-				paintAndPrintText(paths[file_idx], 11);
-				printf(": word found\n");
-			}
-			else {
-				printf("File ");
-				paintAndPrintText(paths[file_idx], 11);
-				printf(": word not found\n");
-			}
+		if (showAllTextInfo && file_found) {
+			printf("\nFile ");
+			paintAndPrintText(paths[file_idx], 11);
+			printf(": found %d times\n", file_found_count);
+		}
+		else {
+			printf("File ");
+			paintAndPrintText(paths[file_idx], 11);
+			printf(": word not found\n");
 		}
 	}
 
