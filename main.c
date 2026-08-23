@@ -20,6 +20,9 @@ int main(int argc, char *argv[])
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 
+	char* paths[100];
+	int paths_count = 0;
+
 	char* path_value = NULL;
 	char* str_value = NULL;
 	int showAllTextInfo = 1;
@@ -39,7 +42,7 @@ int main(int argc, char *argv[])
 		if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--path") == 0)
 		{
 			if (i + 1 < argc) {
-				path_value = argv[++i];
+				paths[paths_count++] = argv[++i];
 			}
 			else {
 				puts("ERROR. Write down a value after -p/--path");
@@ -73,7 +76,7 @@ int main(int argc, char *argv[])
 	}
 
 	// 2. Проверка аргументов на их существование
-	if (path_value == NULL)
+	if (paths_count == 0)
 	{
 		puts("The path of file didn't write");
 		return 1;
@@ -85,47 +88,80 @@ int main(int argc, char *argv[])
 	}
 
 	if (showAllTextInfo) {
-		printf("The path - ");
-		paintAndPrintText(path_value, 11); // Голубой
-		printf("\nLook for string - ");
+		printf("Files to search:\n");
+		for (int i = 0; i < paths_count; i++) {
+			printf("  - ");
+			paintAndPrintText(paths[i], 11); // Голубой
+			printf("\n");
+		}
+		printf("Look for string - ");
 		paintAndPrintText(str_value, 14); // Желтый
 		printf("\n\n");
 	}
 
 
 	// 3. Открытие и чтение текста из файла
-	if (showAllTextInfo) {
-		puts("Open the file by the path....\n");
-	}
-
-	FILE* file = fopen(path_value, "r");
-	if (file == NULL) { perror("Cannot open the file"); return 1; }
-
 	start_time = GetTickCount();
 
-	while (fgets(buffer, sizeof(buffer), file) != NULL)
+	for (int file_idx = 0; file_idx < paths_count; file_idx++)
 	{
-		line_number++;
+		if (showAllTextInfo) {
+			printf("\nOpen the file: ");
+			paintAndPrintText(paths[file_idx], 11); // Голубой
+			printf(" by the path....\n");
+		}
 
-		if (strstr(buffer, str_value) != NULL)
+		FILE* file = fopen(paths[file_idx], "r");
+		if (file == NULL) {
+			printf("Cannot open file: ");
+			paintAndPrintText(paths[file_idx], 12); // Красный
+			printf("\n");
+			continue;
+		}
+
+		line_number = 0;
+		int file_found = 0;
+
+		while (fgets(buffer, sizeof(buffer), file) != NULL)
 		{
-			found = 1;
-			foundInput++;
+			line_number++;
 
-			if (showAllTextInfo) {
-				char line_number_str[16];
-				itoa(line_number, line_number_str, 10);
+			if (strstr(buffer, str_value) != NULL)
+			{
+				found = 1;
+				file_found = 1;
+				foundInput++;
 
-				printf("Line ");
-				paintAndPrintText(line_number_str, 14); // Желтый
-				printf(": %s", buffer);
+				if (showAllTextInfo) {
+					char line_number_str[16];
+					itoa(line_number, line_number_str, 10);
+
+					printf("Line ");
+					paintAndPrintText(line_number_str, 14); // Желтый
+					printf(": %s", buffer);
+				}
+			}
+		}
+
+		fclose(file);
+
+		// Выводим результат для текущего файла
+		if (showAllTextInfo) {
+			puts("");
+			if (file_found) {
+				printf("File ");
+				paintAndPrintText(paths[file_idx], 11);
+				printf(": word found\n");
+			}
+			else {
+				printf("File ");
+				paintAndPrintText(paths[file_idx], 11);
+				printf(": word not found\n");
 			}
 		}
 	}
 
 	end_time = GetTickCount();
-
-	fclose(file);
 
 	if (found != 0 && showAllTextInfo == 1) {
 		printf("\nThe word is ");
