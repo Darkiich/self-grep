@@ -176,15 +176,17 @@ int main(int argc, char *argv[])
 		fclose(file);
 
 		// Выводим результат для текущего файла
-		if (showAllTextInfo && file_found) {
-			printf("\nFile ");
-			paintAndPrintText(paths[file_idx], 11);
-			printf(": found %d times\n", file_found_count);
-		}
-		else {
-			printf("File ");
-			paintAndPrintText(paths[file_idx], 11);
-			printf(": word not found\n");
+		if (showAllTextInfo) {
+			if (file_found) {
+				printf("\nFile ");
+				paintAndPrintText(paths[file_idx], 11);
+				printf(": found %d times\n", file_found_count);
+			}
+			else {
+				printf("File ");
+				paintAndPrintText(paths[file_idx], 11);
+				printf(": word not found\n");
+			}
 		}
 	}
 
