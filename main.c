@@ -17,10 +17,19 @@ void paintAndPrintText(char* text, int color)
 // grep, который рабоатет через аргументы -p | --path и -s | --str
 // -p | --path - путь до файла
 // -s | --str - строка для поиска в тексте
+// -sm | --show-more - выводить ли больше информации о найденных строках (1 - да, 0 - нет)
+// -i | --ignore-case - игнорировать регистр при поиске. Достаточно просто указать этот аргумент
 int main(int argc, char *argv[])
 {
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
+
+	const char* help_text = "Usage: grep -p <file_path> -s <search_string> [-sm <0|1>] [-i]\n"
+		"Options:\n"
+		"  -p, --path        Path to the file to search in\n"
+		"  -s, --str         String to search for\n"
+		"  -sm, --show-more  Show more information about found lines (1 - yes(by default), 0 - no)\n"
+		"  -i, --ignore-case Ignore case when searching\n";
 
 	char* paths[100];
 	int paths_count = 0;
@@ -76,8 +85,12 @@ int main(int argc, char *argv[])
 		{
 			ignore_case = 1;
 		}
+		else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
+		{
+			printf("%s", help_text);
+		}
 		else {
-			printf("Unknown argument: %s\n", argv[i]);
+			printf("%s", help_text);
 			return 1;
 		}
 	}
